@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dental Student Scheduler</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>Dental Scheduler</h1>
+        <p>Patient & appointment dashboard</p>
+      </div>
+      <div class="month-controls">
+        <button id="prevMonth" aria-label="Previous month">‹</button>
+        <h2 id="monthLabel"></h2>
+        <button id="nextMonth" aria-label="Next month">›</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="calendar">Calendar</button>
+      <button class="tab" data-tab="patients">Patients</button>
+    </nav>
+
+    <main>
+      <section id="calendar" class="tab-content active">
+        <div class="calendar">
+          <div class="calendar-grid" id="calendarGrid">
+            <div class="weekday">Monday</div>
+            <div class="weekday">Tuesday</div>
+            <div class="weekday">Wednesday</div>
+            <div class="weekday">Thursday</div>
+            <div class="weekday">Friday</div>
+            <div class="weekday">Saturday</div>
+            <div class="weekday">Sunday</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="patients" class="tab-content">
+        <div class="patients-header">
+          <div>
+            <h2>Patients</h2>
+            <p>Your patient list will appear here.</p>
+          </div>
+          <input id="patientSearch" type="search" placeholder="Search patients...">
+        </div>
+
+        <div class="patient-skeleton">
+          <div class="patient-row header-row">
+            <span>Name</span>
+            <span>Next Appointment</span>
+            <span>Status</span>
+          </div>
+          <div class="empty-state">
+            <div class="empty-icon">+</div>
+            <h3>No patients yet</h3>
+            <p>This is the skeleton for the patient list.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
