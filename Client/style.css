@@ -265,8 +265,16 @@ body {
   margin-bottom: 13px;
   border: 1px dashed #aebac3;
   border-radius: 50%;
+  background: white;
   color: #8b99a4;
   font-size: 25px;
+  cursor: pointer;
+  padding: 0;
+
+}
+.empty-icon:hover {
+    background: #e5e5e5;
+    cursor: pointer;
 }
 
 .empty-state h3 {

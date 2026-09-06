@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from database import engine
+from models import Patient
 
 app = FastAPI()
 
@@ -20,3 +22,11 @@ def test_database():
     return {
         "postgresql_version": version
     }
+@app.get("/patients")
+def get_patients():
+
+    with Session(engine) as session:
+
+        patients = session.query(Patient).all()
+
+        return patients
