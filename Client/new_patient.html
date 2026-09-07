@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add New Patient</title>
+
+    <link rel="stylesheet" href="new_patient.css">
+</head>
+
+<body>
+
+    <div class="form-container">
+
+        <!-- X button -->
+        <button class="close-button" onclick="closeForm()">
+            ×
+        </button>
+
+        <h1>Add New Patient</h1>
+
+        <form id="patient-form">
+
+            <!-- Initials -->
+            <div class="form-group">
+                <label for="initials">Initials</label>
+
+                <input
+                    type="text"
+                    id="initials"
+                    name="initials"
+                    maxlength="15"
+                    required
+                >
+            </div>
+
+
+            <!-- Patient Number -->
+            <div class="form-group">
+                <label for="patient_num">Patient Number</label>
+
+                <input
+                    type="number"
+                    id="patient_num"
+                    name="patient_num"
+                    required
+                >
+            </div>
+
+
+            <!-- Gender -->
+            <div class="form-group">
+                <label for="gender">Gender</label>
+
+                <input
+                    type="text"
+                    id="gender"
+                    name="gender"
+                    maxlength="15"
+                    required
+                >
+            </div>
+
+
+            <!-- Preferred Contact -->
+            <div class="form-group">
+                <label for="preferred_contact">
+                    Preferred Contact
+                </label>
+
+                <select
+                    id="preferred_contact"
+                    name="preferred_contact"
+                    required
+                >
+
+                    <option value="">
+                        Select contact method
+                    </option>
+
+                    <option value="email">
+                        Email
+                    </option>
+
+                    <option value="call">
+                        Call
+                    </option>
+
+                    <option value="text">
+                        Text
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Email -->
+            <div class="form-group">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                >
+
+            </div>
+
+
+            <!-- Phone Number -->
+            <div class="form-group">
+
+                <label for="phone_num">
+                    Phone Number
+                </label>
+
+                <input
+                    type="tel"
+                    id="phone_num"
+                    name="phone_num"
+                    maxlength="15"
+                >
+
+            </div>
+
+
+            <!-- Contact Person -->
+            <div class="form-group">
+
+                <label for="contact_person">
+                    Contact Person
+                </label>
+
+                <input
+                    type="text"
+                    id="contact_person"
+                    name="contact_person"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Payment Method -->
+            <div class="form-group">
+
+                <label for="payment_method">
+                    Payment Method
+                </label>
+
+                <input
+                    type="text"
+                    id="payment_method"
+                    name="payment_method"
+                    maxlength="15"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Notes -->
+            <div class="form-group">
+
+                <label for="notes">
+                    Notes
+                </label>
+
+                <textarea
+                    id="notes"
+                    name="notes"
+                    rows="5"
+                ></textarea>
+
+            </div>
+
+
+            <!-- Last Cleaning -->
+            <div class="form-group">
+
+                <label for="date_last_cleaning">
+                    Date Last Cleaning
+                </label>
+
+                <input
+                    type="date"
+                    id="date_last_cleaning"
+                    name="date_last_cleaning"
+                >
+
+            </div>
+
+
+            <!-- Next Cleaning -->
+            <div class="form-group">
+
+                <label for="date_next_cleaning">
+                    Date Next Cleaning
+                </label>
+
+                <input
+                    type="date"
+                    id="date_next_cleaning"
+                    name="date_next_cleaning"
+                >
+
+            </div>
+
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-button">
+
+                Create Patient
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <script>
+
+        function closeForm() {
+
+            window.location.href = "index.html";
+
+        }
+
+    </script>
+
+</body>
+
+</html>
+<script>
+
+document
+    .getElementById("patient-form")
+    .addEventListener("submit", async function(event) {
+
+        // Stop the browser from refreshing
+        event.preventDefault();
+
+
+        const patientData = {
+
+            initials: document
+                .getElementById("initials")
+                .value,
+
+            patient_num: Number(
+                document
+                    .getElementById("patient_num")
+                    .value
+            ),
+
+            gender: document
+                .getElementById("gender")
+                .value,
+
+            preferred_contact: document
+                .getElementById("preferred_contact")
+                .value,
+
+            email: document
+                .getElementById("email")
+                .value || null,
+
+            phone_num: document
+                .getElementById("phone_num")
+                .value || null,
+
+            contact_person: document
+                .getElementById("contact_person")
+                .value,
+
+            payment_method: document
+                .getElementById("payment_method")
+                .value,
+
+            notes: document
+                .getElementById("notes")
+                .value || null,
+
+            date_last_cleaning: document
+                .getElementById("date_last_cleaning")
+                .value || null,
+
+            date_next_cleaning: document
+                .getElementById("date_next_cleaning")
+                .value || null
+        };
+
+
+        try {
+
+            const response = await fetch(
+                "http://127.0.0.1:8000/patients",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(patientData)
+                }
+            );
+
+
+            const result = await response.json();
+
+
+            if (response.ok) {
+
+                alert("Patient created successfully!");
+
+                console.log(result);
+
+                window.location.href = "index.html";
+
+            }
+
+            else {
+
+                alert(
+                    "Error: " +
+                    JSON.stringify(result)
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Could not connect to the backend."
+            );
+
+        }
+
+    });
+
+</script>
