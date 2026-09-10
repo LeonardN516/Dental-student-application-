@@ -82,6 +82,7 @@ body {
   background: rgba(255,255,255,.18);
 }
 
+
 .tabs {
   display: flex;
   gap: 0;
@@ -232,10 +233,24 @@ body {
 }
 
 .patient-row {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr;
-  gap: 20px;
-  padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr;
+    gap: 20px;
+    width: 100%;
+    padding: 16px 20px;
+
+    border: 1px solid #d6dce1;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    background: white;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.patient-row:hover {
+  background: #e5e5e5;
 }
 
 .header-row {
@@ -289,6 +304,10 @@ body {
   font-size: 13px;
 }
 
+.empty-state.hidden {
+  display: none;
+}
+
 @media (max-width: 800px) {
   .topbar {
     align-items: flex-start;
@@ -326,4 +345,12 @@ body {
   #patientSearch {
     width: 100%;
   }
+  .patient-card {
+    border: 1px solid #d6dce1;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    background: white;
+  }
+
 }

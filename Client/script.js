@@ -142,6 +142,11 @@ async function loadPatients() {
                 "patients-container"
             );
 
+        const emptyState =
+            document.getElementById(
+                "emptyPatientState"
+            );
+
 
         // Remove old patients before loading again
         container.innerHTML = "";
@@ -150,28 +155,22 @@ async function loadPatients() {
         // If there are no patients
         if (patients.length === 0) {
 
-            container.innerHTML = `
-                <div class="empty-state">
-
-                    <h3>No patients yet</h3>
-
-                    <p>
-                        Click the + button to add your first patient.
-                    </p>
-
-                </div>
-            `;
+            emptyState.classList.remove("hidden");
 
             return;
 
         }
+
+        emptyState.classList.add("hidden");
 
 
         // Create one row for every patient
         patients.forEach(patient => {
 
             const patientRow =
-                document.createElement("div");
+                document.createElement("button");
+
+            patientRow.type = "button";
 
 
             patientRow.classList.add(
@@ -232,6 +231,8 @@ async function loadPatients() {
     }
 
 }
+
+
 
 
 // Load patients when the page opens
