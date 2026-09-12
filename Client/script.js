@@ -177,6 +177,11 @@ async function loadPatients() {
                 "patient-row"
             );
 
+            patientRow.addEventListener("click", () => {
+                window.location.href =
+                    `patient_details.html?patient_num=${encodeURIComponent(patient.patient_num)}`;
+            });
+
 
             // Patient information
             patientRow.innerHTML = `

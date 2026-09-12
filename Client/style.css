@@ -231,7 +231,21 @@ body {
   border-radius: 9px;
   overflow: hidden;
 }
+.patient-row-title{
+  display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr;
+    gap: 20px;
+    width: 100%;
+    padding: 16px 20px;
 
+    border: 1px solid #d6dce1;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    background: white;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+}
 .patient-row {
     display: grid;
     grid-template-columns: 2fr 1.5fr 1fr;
