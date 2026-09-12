@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -44,6 +44,17 @@ def get_patients():
     finally:
         db.close()
 
+@app.get("/patients/{patient_num}")
+def get_patient(patient_num: int):
+    db = SessionLocal()
+    try:
+        patient = db.get(Patient, patient_num)
+        if patient is None:
+            raise HTTPException(status_code=404, detail="Patient not found")
+        return patient
+    finally:
+        db.close()
+
 @app.post("/patients")
 def create_patient(patient: PatientCreate):
 
@@ -78,4 +89,38 @@ def create_patient(patient: PatientCreate):
 
     finally:
 
+        db.close()
+
+@app.put("/patients/{patient_num}")
+def update_patient(patient_num: int, patient_data: PatientCreate):
+    db = SessionLocal()
+    try:
+        patient = db.get(Patient, patient_num)
+        if patient is None:
+            raise HTTPException(status_code=404, detail="Patient not found")
+
+        for field, value in patient_data.model_dump().items():
+            setattr(patient, field, value)
+
+        db.commit()
+        db.refresh(patient)
+        return {
+            "message": "Patient updated successfully",
+            "patient_num": patient.patient_num
+        }
+    finally:
+        db.close()
+
+@app.delete("/patients/{patient_num}")
+def delete_patient(patient_num: int):
+    db = SessionLocal()
+    try:
+        patient = db.get(Patient, patient_num)
+        if patient is None:
+            raise HTTPException(status_code=404, detail="Patient not found")
+
+        db.delete(patient)
+        db.commit()
+        return {"message": "Patient deleted successfully"}
+    finally:
         db.close()
