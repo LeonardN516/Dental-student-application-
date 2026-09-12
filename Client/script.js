@@ -113,6 +113,53 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 renderCalendar();
 
+let allPatients = [];
+
+function renderPatients(patients, isSearch = false) {
+    const container = document.getElementById("patients-container");
+    const emptyState = document.getElementById("emptyPatientState");
+    const emptyTitle = emptyState.querySelector("h3");
+    const emptyMessage = emptyState.querySelector("p");
+
+    container.innerHTML = "";
+
+    if (patients.length === 0) {
+        emptyTitle.textContent = isSearch
+            ? "No matching patients"
+            : "No patients yet";
+        emptyMessage.textContent = isSearch
+            ? "Try searching with a different patient number or set of initials."
+            : "Your patients will appear here.";
+        emptyState.classList.remove("hidden");
+        return;
+    }
+
+    emptyState.classList.add("hidden");
+    //creating the button for each patient that is being displayed
+    patients.forEach(patient => {
+        const patientRow = document.createElement("button");
+        patientRow.type = "button";
+        patientRow.classList.add("patient-row");
+
+        patientRow.addEventListener("click", () => {
+            window.location.href =
+                `patient_details.html?patient_num=${encodeURIComponent(patient.patient_num)}`;
+        });
+
+        patientRow.innerHTML = `
+            <span>
+                <strong>${patient.initials}</strong>
+                <br>
+                <small>Patient #${patient.patient_num}</small>
+            </span>
+            <span>${patient.date_next_cleaning || "Not scheduled"}</span>
+            <span>${patient.preferred_contact}</span>
+        `;
+
+        container.appendChild(patientRow);
+    });
+}
+
 async function loadPatients() {
 
     try {
@@ -133,96 +180,8 @@ async function loadPatients() {
 
 
         // Convert the response into JavaScript data
-        const patients = await response.json();
-
-
-        // Find where we want to display them
-        const container =
-            document.getElementById(
-                "patients-container"
-            );
-
-        const emptyState =
-            document.getElementById(
-                "emptyPatientState"
-            );
-
-
-        // Remove old patients before loading again
-        container.innerHTML = "";
-
-
-        // If there are no patients
-        if (patients.length === 0) {
-
-            emptyState.classList.remove("hidden");
-
-            return;
-
-        }
-
-        emptyState.classList.add("hidden");
-
-
-        // Create one row for every patient
-        patients.forEach(patient => {
-
-            const patientRow =
-                document.createElement("button");
-
-            patientRow.type = "button";
-
-
-            patientRow.classList.add(
-                "patient-row"
-            );
-
-            patientRow.addEventListener("click", () => {
-                window.location.href =
-                    `patient_details.html?patient_num=${encodeURIComponent(patient.patient_num)}`;
-            });
-
-
-            // Patient information
-            patientRow.innerHTML = `
-
-                <span>
-
-                    <strong>
-                        ${patient.initials}
-                    </strong>
-
-                    <br>
-
-                    <small>
-                        Patient #${patient.patient_num}
-                    </small>
-
-                </span>
-
-
-                <span>
-
-                    ${patient.date_next_cleaning || "Not scheduled"}
-
-                </span>
-
-
-                <span>
-
-                    ${patient.preferred_contact}
-
-                </span>
-
-            `;
-
-
-            // Add the patient row to the page
-            container.appendChild(
-                patientRow
-            );
-
-        });
+        allPatients = await response.json();
+        renderPatients(allPatients);
 
     }
 
@@ -236,9 +195,28 @@ async function loadPatients() {
     }
 
 }
+//this is where it reads the input given by class == aptientSearch
+document.getElementById("patientSearch").addEventListener("input", event => {
+    const searchValue = event.target.value.trim().toLowerCase();
+    //is somethign is being serached then you go to the next part
+    if (searchValue === "") {
+        renderPatients(allPatients);
+        return;
+    }
 
+    //this is saying that all patients.filter = all aptients .filter wand the function used to filter is the one that we wrote after th e{}
+    const matchingPatients = allPatients.filter(patient => {
+        const patientNumber = String(patient.patient_num);
+        const initials = String(patient.initials).toLowerCase();
 
+        return (
+            patientNumber.startsWith(searchValue) ||
+            initials.startsWith(searchValue)
+        );
+    });
 
+    renderPatients(matchingPatients, true);
+});
 
 // Load patients when the page opens
 loadPatients();
