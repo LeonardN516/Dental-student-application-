@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Details</title>
+  <link rel="stylesheet" href="patient_details.css">
+</head>
+<body>
+  <main class="details-container">
+    <button id="backButton" class="back-button" type="button">&larr; Back to patients</button>
+
+    <div id="loadingState" class="status-message">Loading patient...</div>
+    <div id="errorState" class="status-message error hidden"></div>
+
+    <section id="patientDetails" class="hidden" aria-labelledby="patientName">
+      <header class="details-header">
+        <p class="eyebrow">Patient record</p>
+        <h1 id="patientName"></h1>
+        <p id="patientNumber" class="patient-number"></p>
+      </header>
+
+      <form id="patientForm">
+        <dl class="details-grid">
+          <div class="detail-item">
+            <dt><label for="initials">Initials</label></dt>
+            <dd><input id="initials" type="text" maxlength="15" required></dd>
+          </div>
+          <div class="detail-item">
+            <dt><label for="patientNumInput">Patient number</label></dt>
+            <dd><input id="patientNumInput" type="number" required></dd>
+          </div>
+          <div class="detail-item">
+            <dt><label for="gender">Gender</label></dt>
+            <dd><input id="gender" type="text" maxlength="15" required></dd>
+          </div>
+          <div class="detail-item">
+            <dt><label for="preferredContact">Preferred contact</label></dt>
+            <dd>
+              <select id="preferredContact" required>
+                <option value="email">Email</option>
+                <option value="call">Call</option>
+                <option value="text">Text</option>
+              </select>
+            </dd>
+          </div>
+          <div class="detail-item">
+            <dt><label for="email">Email</label></dt>
+            <dd><input id="email" type="email"></dd>
+          </div>
+          <div class="detail-item">
+            <dt><label for="phoneNumber">Phone number</label></dt>
+            <dd><input id="phoneNumber" type="tel" maxlength="15"></dd>
+          </div>
+          <div class="detail-item">
+            <dt><label for="contactPerson">Contact person</label></dt>
+            <dd><input id="contactPerson" type="text" required></dd>
+          </div>
+          <div class="detail-item">
+            <dt><label for="paymentMethod">Payment method</label></dt>
+            <dd><input id="paymentMethod" type="text" maxlength="15" required></dd>
+          </div>
+          <div class="detail-item">
+            <dt><label for="lastCleaning">Date last cleaning</label></dt>
+            <dd><input id="lastCleaning" type="date"></dd>
+          </div>
+          <div class="detail-item">
+            <dt><label for="nextCleaning">Date next cleaning</label></dt>
+            <dd><input id="nextCleaning" type="date"></dd>
+          </div>
+          <div class="detail-item notes-item">
+            <dt><label for="notes">Notes</label></dt>
+            <dd><textarea id="notes" rows="6"></textarea></dd>
+          </div>
+        </dl>
+
+        <div class="action-buttons">
+          <button type="button" id="deleteButton" class="delete-button">Delete Patient</button>
+          <button type="submit" class="update-button">Update Patient</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = "http://127.0.0.1:8000/patients";
+    const selectedPatientNumber = new URLSearchParams(window.location.search).get("patient_num");
+
+    document.getElementById("backButton").addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+
+    function setInputValue(elementId, value) {
+      document.getElementById(elementId).value = value || "";
+    }
+
+    function showError(message) {
+      document.getElementById("loadingState").classList.add("hidden");
+      const errorState = document.getElementById("errorState");
+      errorState.textContent = message;
+      errorState.classList.remove("hidden");
+    }
+
+    async function loadPatient() {
+      if (!selectedPatientNumber) {
+        showError("No patient was selected.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/${encodeURIComponent(selectedPatientNumber)}`);
+        if (!response.ok) {
+          throw new Error(response.status === 404 ? "Patient not found." : "Could not load patient information.");
+        }
+
+        const patient = await response.json();
+        document.getElementById("patientName").textContent = patient.initials;
+        document.getElementById("patientNumber").textContent = `Patient #${patient.patient_num}`;
+        setInputValue("initials", patient.initials);
+        setInputValue("patientNumInput", patient.patient_num);
+        setInputValue("gender", patient.gender);
+        setInputValue("preferredContact", patient.preferred_contact);
+        setInputValue("email", patient.email);
+        setInputValue("phoneNumber", patient.phone_num);
+        setInputValue("contactPerson", patient.contact_person);
+        setInputValue("paymentMethod", patient.payment_method);
+        setInputValue("lastCleaning", patient.date_last_cleaning);
+        setInputValue("nextCleaning", patient.date_next_cleaning);
+        setInputValue("notes", patient.notes);
+
+        document.getElementById("loadingState").classList.add("hidden");
+        document.getElementById("patientDetails").classList.remove("hidden");
+      } catch (error) {
+        console.error("Error loading patient:", error);
+        showError(error.message);
+      }
+    }
+
+    document.getElementById("patientForm").addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const patientData = {
+        initials: document.getElementById("initials").value,
+        patient_num: Number(document.getElementById("patientNumInput").value),
+        gender: document.getElementById("gender").value,
+        preferred_contact: document.getElementById("preferredContact").value,
+        email: document.getElementById("email").value || null,
+        phone_num: document.getElementById("phoneNumber").value || null,
+        contact_person: document.getElementById("contactPerson").value,
+        payment_method: document.getElementById("paymentMethod").value,
+        notes: document.getElementById("notes").value || null,
+        date_last_cleaning: document.getElementById("lastCleaning").value || null,
+        date_next_cleaning: document.getElementById("nextCleaning").value || null
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/${encodeURIComponent(selectedPatientNumber)}`, {
+          method: "PUT",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(patientData)
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.detail || "Could not update patient.");
+        }
+
+        alert("Patient updated successfully.");
+        window.location.href = `patient_details.html?patient_num=${encodeURIComponent(result.patient_num)}`;
+      } catch (error) {
+        console.error("Error updating patient:", error);
+        alert(error.message);
+      }
+    });
+
+    document.getElementById("deleteButton").addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to delete this patient?")) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/${encodeURIComponent(selectedPatientNumber)}`, {
+          method: "DELETE"
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.detail || "Could not delete patient.");
+        }
+
+        alert("Patient deleted successfully.");
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Error deleting patient:", error);
+        alert(error.message);
+      }
+    });
+
+    loadPatient();
+  </script>
+</body>
+</html>

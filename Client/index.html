@@ -40,28 +40,54 @@
         </div>
       </section>
 
+      
       <section id="patients" class="tab-content">
+        
+
         <div class="patients-header">
           <div>
             <h2>Patients</h2>
             <p>Your patient list will appear here.</p>
           </div>
-          <input id="patientSearch" type="search" placeholder="Search patients...">
-        </div>
 
-        <div class="patient-skeleton">
-          <div class="patient-row header-row">
+          <input
+            id="patientSearch"
+            type="search"
+            placeholder="Search patients..."
+          >
+
+        </div>
+        <div class="patient-row-title header-row">
             <span>Name</span>
             <span>Next Appointment</span>
-            <span>Status</span>
-          </div>
-          <div class="empty-state">
-            <div class="empty-icon">+</div>
-            <h3>No patients yet</h3>
-            <p>This is the skeleton for the patient list.</p>
-          </div>
+            <span>preffered contact</span>
         </div>
+        <div class="patient-list">
+         
+          <!-- Patient cards will be added here automatically -->
+          <div id="patients-container">
+
+          </div>
+
+        </div>
+
+        <!-- Add Patient Button -->
+        <button
+          id="addPatientButton"
+          class="empty-icon"
+          onclick="window.location.href='new_patient.html'"
+        >
+          +
+        </button>
+
+        <div id="emptyPatientState" class="empty-state hidden">
+          <h3>No patients yet</h3>
+          <p>Your patients will appear here.</p>
+        </div>
+
       </section>
+      
+
     </main>
   </div>
 

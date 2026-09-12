@@ -1,3 +1,4 @@
 .venv 
 classes_Needed.log
 __pycache__/
+.env

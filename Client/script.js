@@ -112,3 +112,133 @@ document.querySelectorAll(".tab").forEach(tab => {
 });
 
 renderCalendar();
+
+async function loadPatients() {
+
+    try {
+
+        // Ask FastAPI for all patients
+        const response = await fetch(
+            "http://127.0.0.1:8000/patients"
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Could not load patients"
+            );
+
+        }
+
+
+        // Convert the response into JavaScript data
+        const patients = await response.json();
+
+
+        // Find where we want to display them
+        const container =
+            document.getElementById(
+                "patients-container"
+            );
+
+        const emptyState =
+            document.getElementById(
+                "emptyPatientState"
+            );
+
+
+        // Remove old patients before loading again
+        container.innerHTML = "";
+
+
+        // If there are no patients
+        if (patients.length === 0) {
+
+            emptyState.classList.remove("hidden");
+
+            return;
+
+        }
+
+        emptyState.classList.add("hidden");
+
+
+        // Create one row for every patient
+        patients.forEach(patient => {
+
+            const patientRow =
+                document.createElement("button");
+
+            patientRow.type = "button";
+
+
+            patientRow.classList.add(
+                "patient-row"
+            );
+
+            patientRow.addEventListener("click", () => {
+                window.location.href =
+                    `patient_details.html?patient_num=${encodeURIComponent(patient.patient_num)}`;
+            });
+
+
+            // Patient information
+            patientRow.innerHTML = `
+
+                <span>
+
+                    <strong>
+                        ${patient.initials}
+                    </strong>
+
+                    <br>
+
+                    <small>
+                        Patient #${patient.patient_num}
+                    </small>
+
+                </span>
+
+
+                <span>
+
+                    ${patient.date_next_cleaning || "Not scheduled"}
+
+                </span>
+
+
+                <span>
+
+                    ${patient.preferred_contact}
+
+                </span>
+
+            `;
+
+
+            // Add the patient row to the page
+            container.appendChild(
+                patientRow
+            );
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error loading patients:",
+            error
+        );
+
+    }
+
+}
+
+
+
+
+// Load patients when the page opens
+loadPatients();
