@@ -131,6 +131,7 @@ def delete_patient(patient_num: int):
 # Appointment requests
 @app.get("/appointments")
 def get_appointments(
+    patient_num: Optional[int] = None,
     appointment_date: Optional[date] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None
@@ -145,6 +146,10 @@ def get_appointments(
     try:
         query = db.query(Appointment)
 
+        if patient_num is not None:
+            query = query.filter(
+                Appointment.patient_num == patient_num
+            )
         if appointment_date:
             query = query.filter(
                 Appointment.appointment_date == appointment_date

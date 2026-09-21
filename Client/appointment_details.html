@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointment Details</title>
+  <link rel="stylesheet" href="appointment_details.css">
+</head>
+<body>
+  <main class="details-container">
+    <button id="backButton" class="back-button" type="button">
+      &larr; Back
+    </button>
+
+    <div id="loadingState" class="status-message">Loading appointment...</div>
+    <div id="errorState" class="status-message error hidden"></div>
+
+    <section id="appointmentDetails" class="details-card hidden">
+      <header class="details-header">
+        <p>Appointment record</p>
+        <h1>Appointment Details</h1>
+        <span id="appointmentNumber"></span>
+      </header>
+
+      <form id="appointmentForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="patientNum">Patient Number</label>
+            <input id="patientNum" type="number" min="1" required>
+          </div>
+
+          <div class="form-group">
+            <label for="appointmentDate">Appointment Date</label>
+            <input id="appointmentDate" type="date" required>
+          </div>
+
+          <div class="form-group">
+            <label for="startTime">Start Time</label>
+            <input id="startTime" type="time" required>
+          </div>
+
+          <div class="form-group">
+            <label for="appointmentType">Appointment Type</label>
+            <input id="appointmentType" type="text" maxlength="100">
+          </div>
+
+          <div class="form-group notes-group">
+            <label for="appointmentNotes">Notes</label>
+            <textarea id="appointmentNotes" rows="6"></textarea>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="deleteButton" class="delete-button" type="button">Delete Appointment</button>
+          <button class="update-button" type="submit">Update Appointment</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const APPOINTMENTS_URL = "http://127.0.0.1:8000/appointments";
+    const urlParameters = new URLSearchParams(window.location.search);
+    const appointmentId = urlParameters.get("appointment_id");
+
+    function getReturnUrl() {
+      if (urlParameters.get("from") === "day" && urlParameters.get("date")) {
+        return `day_schedule.html?date=${encodeURIComponent(urlParameters.get("date"))}`;
+      }
+
+      if (urlParameters.get("from") === "patient" && urlParameters.get("patient_num")) {
+        return `patient_details.html?patient_num=${encodeURIComponent(urlParameters.get("patient_num"))}`;
+      }
+
+      return "index.html";
+    }
+
+    document.getElementById("backButton").addEventListener("click", () => {
+      window.location.href = getReturnUrl();
+    });
+
+    function setInputValue(elementId, value) {
+      document.getElementById(elementId).value = value || "";
+    }
+
+    function showError(message) {
+      document.getElementById("loadingState").classList.add("hidden");
+      const errorState = document.getElementById("errorState");
+      errorState.textContent = message;
+      errorState.classList.remove("hidden");
+    }
+
+    async function loadAppointment() {
+      if (!appointmentId) {
+        showError("No appointment was selected.");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${APPOINTMENTS_URL}/${encodeURIComponent(appointmentId)}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            response.status === 404
+              ? "Appointment not found."
+              : "Could not load appointment."
+          );
+        }
+
+        const appointment = await response.json();
+        document.getElementById("appointmentNumber").textContent =
+          `Appointment #${appointment.appointment_id}`;
+        setInputValue("patientNum", appointment.patient_num);
+        setInputValue("appointmentDate", appointment.appointment_date);
+        setInputValue("startTime", appointment.start_time.slice(0, 5));
+        setInputValue("appointmentType", appointment.appointment_type);
+        setInputValue("appointmentNotes", appointment.notes);
+
+        document.getElementById("loadingState").classList.add("hidden");
+        document.getElementById("appointmentDetails").classList.remove("hidden");
+      } catch (error) {
+        console.error("Error loading appointment:", error);
+        showError(error.message);
+      }
+    }
+
+    document.getElementById("appointmentForm").addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const appointmentData = {
+        patient_num: Number(document.getElementById("patientNum").value),
+        appointment_date: document.getElementById("appointmentDate").value,
+        start_time: document.getElementById("startTime").value,
+        appointment_type: document.getElementById("appointmentType").value || null,
+        notes: document.getElementById("appointmentNotes").value || null
+      };
+
+      try {
+        const response = await fetch(
+          `${APPOINTMENTS_URL}/${encodeURIComponent(appointmentId)}`,
+          {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(appointmentData)
+          }
+        );
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.detail || "Could not update appointment.");
+        }
+
+        alert("Appointment updated successfully.");
+        window.location.reload();
+      } catch (error) {
+        console.error("Error updating appointment:", error);
+        alert(error.message);
+      }
+    });
+
+    document.getElementById("deleteButton").addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to delete this appointment?")) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${APPOINTMENTS_URL}/${encodeURIComponent(appointmentId)}`,
+          {method: "DELETE"}
+        );
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.detail || "Could not delete appointment.");
+        }
+
+        alert("Appointment deleted successfully.");
+        window.location.href = getReturnUrl();
+      } catch (error) {
+        console.error("Error deleting appointment:", error);
+        alert(error.message);
+      }
+    });
+
+    loadAppointment();
+  </script>
+</body>
+</html>

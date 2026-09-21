@@ -71,11 +71,17 @@
           <button type="submit" class="update-button">Update Patient</button>
         </div>
       </form>
+
+      <section class="appointments-section" aria-labelledby="appointmentsHeading">
+        <h2 id="appointmentsHeading">Appointments</h2>
+        <div id="appointmentsContainer"></div>
+      </section>
     </section>
   </main>
 
   <script>
     const API_URL = "http://127.0.0.1:8000/patients";
+    const APPOINTMENTS_URL = "http://127.0.0.1:8000/appointments";
     const selectedPatientNumber = new URLSearchParams(window.location.search).get("patient_num");
 
     document.getElementById("backButton").addEventListener("click", () => {
@@ -91,6 +97,86 @@
       const errorState = document.getElementById("errorState");
       errorState.textContent = message;
       errorState.classList.remove("hidden");
+    }
+
+    function getAppointmentDateTime(appointment) {
+      const [year, month, day] = appointment.appointment_date
+        .split("-")
+        .map(Number);
+      const [hour, minute, second = 0] = appointment.start_time
+        .split(":")
+        .map(Number);
+
+      return new Date(year, month - 1, day, hour, minute, second);
+    }
+
+    function formatAppointmentDateTime(appointment) {
+      return new Intl.DateTimeFormat("en-US", {
+        weekday: "short",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(getAppointmentDateTime(appointment));
+    }
+
+    function renderAppointments(appointments) {
+      const container = document.getElementById("appointmentsContainer");
+      container.innerHTML = "";
+
+      if (appointments.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "empty-appointments";
+        emptyMessage.textContent = "No appointments";
+        container.appendChild(emptyMessage);
+        return;
+      }
+
+      appointments.forEach(appointment => {
+        const appointmentCard = document.createElement("a");
+        appointmentCard.className = "appointment-card";
+        appointmentCard.href =
+          `appointment_details.html?appointment_id=${encodeURIComponent(appointment.appointment_id)}` +
+          `&from=patient&patient_num=${encodeURIComponent(selectedPatientNumber)}`;
+
+        const dateTime = document.createElement("h3");
+        dateTime.textContent = formatAppointmentDateTime(appointment);
+
+        const type = document.createElement("p");
+        type.textContent = appointment.appointment_type || "No appointment type";
+
+        appointmentCard.appendChild(dateTime);
+        appointmentCard.appendChild(type);
+
+        if (appointment.notes) {
+          const notes = document.createElement("p");
+          notes.className = "appointment-notes";
+          notes.textContent = appointment.notes;
+          appointmentCard.appendChild(notes);
+        }
+
+        container.appendChild(appointmentCard);
+      });
+    }
+    const today = new Date();
+    const todayString = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, "0"),
+      String(today.getDate()).padStart(2, "0")
+    ].join("-")
+
+    async function loadAppointments() {
+      const response = await fetch(
+        `${APPOINTMENTS_URL}?patient_num=${encodeURIComponent(selectedPatientNumber)}&start_date=${todayString}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Could not load appointments.");
+      }
+
+      const appointments = await response.json();
+      renderAppointments(appointments);
     }
 
     async function loadPatient() {
@@ -117,6 +203,8 @@
         setInputValue("contactPerson", patient.contact_person);
         setInputValue("paymentMethod", patient.payment_method);
         setInputValue("notes", patient.notes);
+
+        await loadAppointments();
 
         document.getElementById("loadingState").classList.add("hidden");
         document.getElementById("patientDetails").classList.remove("hidden");

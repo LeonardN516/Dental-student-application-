@@ -4,6 +4,8 @@ const prevMonth = document.getElementById("prevMonth");
 const nextMonth = document.getElementById("nextMonth");
 
 let currentDate = new Date();
+let allPatients = [];
+let allAppointments = [];
 
 function renderCalendar() {
   const year = currentDate.getFullYear();
@@ -64,7 +66,19 @@ function renderCalendar() {
     // Placeholder for future appointments.
     const note = document.createElement("div");
     note.className = "day-note";
-    note.textContent = "";
+
+    const dateKey = formatLocalDate(cellDate);
+    const appointmentCount = allAppointments.filter(
+      appointment => appointment.appointment_date === dateKey
+    ).length;
+
+    if (appointmentCount > 0) {
+      note.classList.add("has-appointments");
+      note.textContent = appointmentCount === 1
+        ? "1 appointment"
+        : `${appointmentCount} appointments`;
+    }
+
     cell.appendChild(note);
 
     if (isToday(cellDate)) {
@@ -122,7 +136,43 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 renderCalendar();
 
-let allPatients = [];
+function getAppointmentDateTime(appointment) {
+    const [year, month, day] = appointment.appointment_date
+        .split("-")
+        .map(Number);
+    const [hour, minute, second = 0] = appointment.start_time
+        .split(":")
+        .map(Number);
+
+    return new Date(year, month - 1, day, hour, minute, second);
+}
+
+function getNextAppointment(patientNumber) {
+    const now = new Date();
+
+    return allAppointments
+        .filter(appointment =>
+            appointment.patient_num === patientNumber &&
+            getAppointmentDateTime(appointment) >= now
+        )
+        .sort((first, second) =>
+            getAppointmentDateTime(first) - getAppointmentDateTime(second)
+        )[0] || null;
+}
+
+function formatAppointmentDateTime(appointment) {
+    if (!appointment) {
+        return "No appointment";
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+    }).format(getAppointmentDateTime(appointment));
+}
 
 function renderPatients(patients, isSearch = false) {
     const container = document.getElementById("patients-container");
@@ -146,6 +196,7 @@ function renderPatients(patients, isSearch = false) {
     emptyState.classList.add("hidden");
     //creating the button for each patient that is being created
     patients.forEach(patient => {
+        const nextAppointment = getNextAppointment(patient.patient_num);
         const patientRow = document.createElement("button");
         patientRow.type = "button";
         patientRow.classList.add("patient-row");
@@ -161,6 +212,7 @@ function renderPatients(patients, isSearch = false) {
                 <br>
                 <small>Patient #${patient.patient_num}</small>
             </span>
+            <span>${formatAppointmentDateTime(nextAppointment)}</span>
             <span>${patient.preferred_contact}</span>
         `;
 
@@ -172,13 +224,14 @@ async function loadPatients() {
 
     try {
 
-        // Ask FastAPI for all patients
-        const response = await fetch(
-            "http://127.0.0.1:8000/patients"
-        );
+        // Ask FastAPI for all patients and appointments
+        const [patientsResponse, appointmentsResponse] = await Promise.all([
+            fetch("http://127.0.0.1:8000/patients"),
+            fetch("http://127.0.0.1:8000/appointments")
+        ]);
 
 
-        if (!response.ok) {
+        if (!patientsResponse.ok || !appointmentsResponse.ok) {
 
             throw new Error(
                 "Could not load patients"
@@ -188,8 +241,10 @@ async function loadPatients() {
 
 
         // Convert the response into JavaScript data
-        allPatients = await response.json();
+        allPatients = await patientsResponse.json();
+        allAppointments = await appointmentsResponse.json();
         renderPatients(allPatients);
+        renderCalendar();
 
     }
 

@@ -18,9 +18,8 @@
         <h1 id="dateHeading">Selected day</h1>
       </header>
 
-      <div class="empty-schedule">
-        <h2>No appointments for this day</h2>
-        <p>Appointments scheduled for this date will appear here.</p>
+      <div id="scheduleContent" class="schedule-content">
+        <p class="schedule-message">Loading appointments...</p>
       </div>
     </section>
   </main>
@@ -30,7 +29,115 @@
       window.location.href = "index.html";
     });
 
+    const APPOINTMENTS_URL = "http://127.0.0.1:8000/appointments";
     const selectedDate = new URLSearchParams(window.location.search).get("date");
+
+    function formatTime(timeValue) {
+      const [hour, minute] = timeValue.split(":").map(Number);
+      const time = new Date(2000, 0, 1, hour, minute);
+
+      return new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(time);
+    }
+
+    function showMessage(title, message, isError = false) {
+      const container = document.getElementById("scheduleContent");
+      container.innerHTML = "";
+
+      const messageBox = document.createElement("div");
+      messageBox.className = `empty-schedule${isError ? " error-message" : ""}`;
+
+      const heading = document.createElement("h2");
+      heading.textContent = title;
+
+      const description = document.createElement("p");
+      description.textContent = message;
+
+      messageBox.appendChild(heading);
+      messageBox.appendChild(description);
+      container.appendChild(messageBox);
+    }
+
+    function renderAppointments(appointments) {
+      const container = document.getElementById("scheduleContent");
+      container.innerHTML = "";
+
+      if (appointments.length === 0) {
+        showMessage(
+          "No appointments for this day",
+          "Appointments scheduled for this date will appear here."
+        );
+        return;
+      }
+
+      appointments
+        .sort((first, second) =>
+          first.start_time.localeCompare(second.start_time)
+        )
+        .forEach(appointment => {
+          const appointmentRow = document.createElement("a");
+          appointmentRow.className = "appointment-row";
+          appointmentRow.href =
+            `appointment_details.html?appointment_id=${encodeURIComponent(appointment.appointment_id)}` +
+            `&from=day&date=${encodeURIComponent(selectedDate)}`;
+
+          const time = document.createElement("time");
+          time.className = "appointment-time";
+          time.textContent = formatTime(appointment.start_time);
+
+          const information = document.createElement("div");
+          information.className = "appointment-information";
+
+          const type = document.createElement("h2");
+          type.textContent = appointment.appointment_type || "Appointment";
+
+          const patient = document.createElement("p");
+          patient.textContent = `Patient #${appointment.patient_num}`;
+
+          information.appendChild(type);
+          information.appendChild(patient);
+
+          if (appointment.notes) {
+            const notes = document.createElement("p");
+            notes.className = "appointment-notes";
+            notes.textContent = appointment.notes;
+            information.appendChild(notes);
+          }
+
+          appointmentRow.appendChild(time);
+          appointmentRow.appendChild(information);
+          container.appendChild(appointmentRow);
+        });
+    }
+
+    async function loadAppointments() {
+      if (!selectedDate) {
+        showMessage("No date selected", "Return to the calendar and select a day.", true);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${APPOINTMENTS_URL}?appointment_date=${encodeURIComponent(selectedDate)}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Could not load appointments.");
+        }
+
+        const appointments = await response.json();
+        renderAppointments(appointments);
+      } catch (error) {
+        console.error("Error loading appointments:", error);
+        showMessage(
+          "Could not load appointments",
+          "Check that the backend is running and try again.",
+          true
+        );
+      }
+    }
 
     if (selectedDate) {
       const dateParts = selectedDate.split("-").map(Number);
@@ -44,6 +151,8 @@
           year: "numeric"
         }).format(localDate);
     }
+
+    loadAppointments();
   </script>
 </body>
 </html>

@@ -85,6 +85,68 @@ body {
   margin: 0;
 }
 
+.schedule-content {
+  min-height: 350px;
+}
+
+.schedule-message {
+  margin: 0;
+  padding: 40px 30px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.appointment-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 24px;
+  width: 100%;
+  padding: 22px 30px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--white);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.appointment-row:hover {
+  background: #f7f7f7;
+}
+
+.appointment-row:last-child {
+  border-bottom: 0;
+}
+
+.appointment-time {
+  color: var(--blue);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.appointment-information h2 {
+  margin: 0 0 6px;
+  color: var(--navy);
+  font-size: 18px;
+}
+
+.appointment-information p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.appointment-information .appointment-notes {
+  margin-top: 10px;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.error-message h2 {
+  color: #a12b2b;
+}
+
 @media (max-width: 650px) {
   body {
     padding: 20px 12px;
@@ -92,5 +154,11 @@ body {
 
   .schedule-header {
     padding: 22px 20px;
+  }
+
+  .appointment-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 20px;
   }
 }
