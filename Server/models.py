@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Date
+from sqlalchemy import Column, Integer, String, Text, Date, Time, ForeignKey
 from database import Base
 
 
@@ -47,10 +47,18 @@ class Patient(Base):
         Text
     )
 
-    date_last_cleaning = Column(
-        Date
-    )
 
-    date_next_cleaning = Column(
-        Date
-    )
+
+class Appointment(Base):
+      __tablename__ = "appointment"
+
+      appointment_id = Column(Integer, primary_key=True)
+      patient_num = Column(
+          Integer,
+          ForeignKey("patient.patient_num"),
+          nullable=False
+      )
+      appointment_date = Column(Date, nullable=False)
+      start_time = Column(Time, nullable=False)
+      appointment_type = Column(String(100))
+      notes = Column(Text)

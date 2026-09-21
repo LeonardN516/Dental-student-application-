@@ -1,10 +1,13 @@
+from datetime import date
+from typing import Optional
+
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from database import engine, SessionLocal
-from models import Patient
-from schemas import PatientCreate
+from models import Patient, Appointment
+from schemas import PatientCreate, AppointmentCreate
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -72,8 +75,6 @@ def create_patient(patient: PatientCreate):
             contact_person=patient.contact_person,
             payment_method=patient.payment_method,
             notes=patient.notes,
-            date_last_cleaning=patient.date_last_cleaning,
-            date_next_cleaning=patient.date_next_cleaning
         )
 
         db.add(new_patient)
@@ -122,5 +123,133 @@ def delete_patient(patient_num: int):
         db.delete(patient)
         db.commit()
         return {"message": "Patient deleted successfully"}
+    finally:
+        db.close()
+
+
+
+# Appointment requests
+@app.get("/appointments")
+def get_appointments(
+    patient_num: Optional[int] = None,
+    appointment_date: Optional[date] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None
+):
+    if start_date and end_date and start_date > end_date:
+        raise HTTPException(
+            status_code=400,
+            detail="start_date cannot be after end_date"
+        )
+
+    db = SessionLocal()
+    try:
+        query = db.query(Appointment)
+
+        if patient_num is not None:
+            query = query.filter(
+                Appointment.patient_num == patient_num
+            )
+        if appointment_date:
+            query = query.filter(
+                Appointment.appointment_date == appointment_date
+            )
+        if start_date:
+            query = query.filter(
+                Appointment.appointment_date >= start_date
+            )
+        if end_date:
+            query = query.filter(
+                Appointment.appointment_date <= end_date
+            )
+
+        return query.order_by(
+            Appointment.appointment_date,
+            Appointment.start_time
+        ).all()
+    finally:
+        db.close()
+
+
+@app.get("/appointments/{appointment_id}")
+def get_appointment(appointment_id: int):
+    db = SessionLocal()
+    try:
+        appointment = db.get(Appointment, appointment_id)
+
+        if appointment is None:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+
+        return appointment
+    finally:
+        db.close()
+
+
+@app.post("/appointments", status_code=201)
+def create_appointment(appointment_data: AppointmentCreate):
+    db = SessionLocal()
+    try:
+        patient = db.get(Patient, appointment_data.patient_num)
+
+        if patient is None:
+            raise HTTPException(status_code=404, detail="Patient not found")
+
+        new_appointment = Appointment(**appointment_data.model_dump())
+        db.add(new_appointment)
+        db.commit()
+        db.refresh(new_appointment)
+
+        return {
+            "message": "Appointment created successfully",
+            "appointment_id": new_appointment.appointment_id
+        }
+    finally:
+        db.close()
+
+
+@app.put("/appointments/{appointment_id}")
+def update_appointment(
+    appointment_id: int,
+    appointment_data: AppointmentCreate
+):
+    db = SessionLocal()
+    try:
+        appointment = db.get(Appointment, appointment_id)
+
+        if appointment is None:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+
+        patient = db.get(Patient, appointment_data.patient_num)
+
+        if patient is None:
+            raise HTTPException(status_code=404, detail="Patient not found")
+
+        for field, value in appointment_data.model_dump().items():
+            setattr(appointment, field, value)
+
+        db.commit()
+        db.refresh(appointment)
+
+        return {
+            "message": "Appointment updated successfully",
+            "appointment_id": appointment.appointment_id
+        }
+    finally:
+        db.close()
+
+
+@app.delete("/appointments/{appointment_id}")
+def delete_appointment(appointment_id: int):
+    db = SessionLocal()
+    try:
+        appointment = db.get(Appointment, appointment_id)
+
+        if appointment is None:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+
+        db.delete(appointment)
+        db.commit()
+
+        return {"message": "Appointment deleted successfully"}
     finally:
         db.close()

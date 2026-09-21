@@ -39,14 +39,20 @@ body {
   cursor: pointer;
 }
 
+.details-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+}
+
 .details-header {
   padding: 28px 30px;
-  border-radius: 10px 10px 0 0;
   background: var(--pink);
   color: var(--navy);
 }
 
-.eyebrow {
+.details-header p {
   margin: 0 0 7px;
   color: var(--blue);
   font-size: 12px;
@@ -55,33 +61,30 @@ body {
   text-transform: uppercase;
 }
 
-h1 {
+.details-header h1 {
   margin: 0 0 7px;
 }
 
-.patient-number {
-  margin: 0;
+.details-header span {
   color: var(--muted);
 }
 
-.details-grid {
+.form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
-  margin: 0;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 0 0 10px 10px;
   background: var(--border);
 }
 
-.detail-item {
-  min-height: 100px;
+.form-group {
+  display: flex;
+  min-height: 110px;
+  flex-direction: column;
   padding: 20px 24px;
   background: var(--white);
 }
 
-.detail-item dt {
+.form-group label {
   margin-bottom: 8px;
   color: var(--muted);
   font-size: 12px;
@@ -90,120 +93,55 @@ h1 {
   text-transform: uppercase;
 }
 
-.detail-item dd {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.detail-item input,
-.detail-item select,
-.detail-item textarea {
+.form-group input,
+.form-group textarea {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--white);
   color: var(--text);
   font: inherit;
 }
 
-.detail-item textarea {
+.form-group textarea {
   resize: vertical;
 }
 
-.notes-item {
+.notes-group {
   grid-column: 1 / -1;
 }
- .notes-item dt {
-    text-align: center;
-  }
-
-  .notes-item dd {
-    text-align: left;
-  }
 
 .action-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-top: 16px;
+  padding: 18px;
 }
 
-.update-button,
-.delete-button {
-  width: 100%;
-  padding: 16px;
-  border: none;
+.action-buttons button {
+  padding: 15px;
+  border: 0;
   border-radius: 7px;
   color: white;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .delete-button {
-  background-color: #c0392b;
+  background: #c0392b;
 }
 
 .delete-button:hover {
-  background-color: #a93226;
+  background: #a93226;
 }
 
-.appointments-section {
-  margin-top: 28px;
+.update-button {
+  background: #4caf50;
 }
 
-.appointments-section h2 {
-  margin: 0 0 14px;
-  color: var(--navy);
-}
-
-#appointmentsContainer {
-  display: grid;
-  gap: 12px;
-}
-
-.appointment-card {
-  width: 100%;
-  padding: 18px 20px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.appointment-card:hover {
-  background: #f7f7f7;
-}
-
-.appointment-card h3 {
-  margin: 0 0 8px;
-  color: var(--navy);
-  font-size: 17px;
-}
-
-.appointment-card p {
-  margin: 0;
-}
-
-.appointment-card .appointment-notes {
-  margin-top: 10px;
-  color: var(--muted);
-  white-space: pre-wrap;
-}
-
-.empty-appointments {
-  margin: 0;
-  padding: 28px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  color: var(--muted);
-  text-align: center;
+.update-button:hover {
+  background: #45a049;
 }
 
 .status-message {
@@ -227,42 +165,12 @@ h1 {
     padding: 20px 12px;
   }
 
-  .details-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .notes-item {
-    grid-column: auto;
-  }
-
+  .form-grid,
   .action-buttons {
     grid-template-columns: 1fr;
   }
 
-}
-  .update-button {
-
-    width: 100%;
-
-    padding: 12px;
-
-    font-size: 30px;
-
-    border: none;
-
-    border-radius: 5px;
-
-    cursor: pointer;
-
-    background-color: #4CAF50;
-
-    color: white;
-
-}
-
-
-.update-button:hover {
-
-    background-color: #45a049;
-
+  .notes-group {
+    grid-column: auto;
+  }
 }
