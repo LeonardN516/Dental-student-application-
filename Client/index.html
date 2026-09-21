@@ -23,10 +23,22 @@
     <nav class="tabs">
       <button class="tab active" data-tab="calendar">Calendar</button>
       <button class="tab" data-tab="patients">Patients</button>
+      
+      <div class="calendar-actions">
+      <button
+        class="schedule-appointment-button"
+        type="button"
+        onclick="window.location.href='new_appointment.html'"
+      >
+        Schedule Appointment
+      </button>
+    </div>
     </nav>
-
+    
     <main>
       <section id="calendar" class="tab-content active">
+        
+
         <div class="calendar">
           <div class="calendar-grid" id="calendarGrid">
             <div class="weekday">Monday</div>

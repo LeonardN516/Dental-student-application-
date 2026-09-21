@@ -60,14 +60,6 @@
             <dt><label for="paymentMethod">Payment method</label></dt>
             <dd><input id="paymentMethod" type="text" maxlength="15" required></dd>
           </div>
-          <div class="detail-item">
-            <dt><label for="lastCleaning">Date last cleaning</label></dt>
-            <dd><input id="lastCleaning" type="date"></dd>
-          </div>
-          <div class="detail-item">
-            <dt><label for="nextCleaning">Date next cleaning</label></dt>
-            <dd><input id="nextCleaning" type="date"></dd>
-          </div>
           <div class="detail-item notes-item">
             <dt><label for="notes">Notes</label></dt>
             <dd><textarea id="notes" rows="6"></textarea></dd>
@@ -124,8 +116,6 @@
         setInputValue("phoneNumber", patient.phone_num);
         setInputValue("contactPerson", patient.contact_person);
         setInputValue("paymentMethod", patient.payment_method);
-        setInputValue("lastCleaning", patient.date_last_cleaning);
-        setInputValue("nextCleaning", patient.date_next_cleaning);
         setInputValue("notes", patient.notes);
 
         document.getElementById("loadingState").classList.add("hidden");
@@ -148,9 +138,7 @@
         phone_num: document.getElementById("phoneNumber").value || null,
         contact_person: document.getElementById("contactPerson").value,
         payment_method: document.getElementById("paymentMethod").value,
-        notes: document.getElementById("notes").value || null,
-        date_last_cleaning: document.getElementById("lastCleaning").value || null,
-        date_next_cleaning: document.getElementById("nextCleaning").value || null
+        notes: document.getElementById("notes").value || null
       };
 
       try {

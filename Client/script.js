@@ -36,7 +36,8 @@ function renderCalendar() {
   const totalCells = 42;
 
   for (let i = 0; i < totalCells; i++) {
-    const cell = document.createElement("div");
+    const cell = document.createElement("button");
+    cell.type = "button";
     cell.className = "day";
 
     let dayNumber;
@@ -71,12 +72,20 @@ function renderCalendar() {
     }
 
     cell.addEventListener("click", () => {
-      console.log("Selected date:", cellDate.toDateString());
-      // Future: display that day's agenda here.
+      const dateKey = formatLocalDate(cellDate);
+      window.location.href =
+        `day_schedule.html?date=${encodeURIComponent(dateKey)}`;
     });
 
     calendarGrid.appendChild(cell);
   }
+}
+
+function formatLocalDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function isToday(date) {
@@ -135,7 +144,7 @@ function renderPatients(patients, isSearch = false) {
     }
 
     emptyState.classList.add("hidden");
-    //creating the button for each patient that is being displayed
+    //creating the button for each patient that is being created
     patients.forEach(patient => {
         const patientRow = document.createElement("button");
         patientRow.type = "button";
@@ -152,7 +161,6 @@ function renderPatients(patients, isSearch = false) {
                 <br>
                 <small>Patient #${patient.patient_num}</small>
             </span>
-            <span>${patient.date_next_cleaning || "Not scheduled"}</span>
             <span>${patient.preferred_contact}</span>
         `;
 

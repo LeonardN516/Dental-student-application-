@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule Appointment</title>
+  <link rel="stylesheet" href="new_appointment.css">
+</head>
+<body>
+  <main class="form-container">
+    <button id="closeButton" class="close-button" type="button" aria-label="Close">
+      &times;
+    </button>
+
+    <h1>Schedule Appointment</h1>
+
+    <form id="appointmentForm">
+      <div class="form-group">
+        <label for="patientNum">Patient Number</label>
+        <input id="patientNum" type="number" min="1" required>
+        <small>The patient number must belong to an existing patient.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="appointmentDate">Appointment Date</label>
+        <input id="appointmentDate" type="date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="startTime">Start Time</label>
+        <input id="startTime" type="time" required>
+      </div>
+
+      <div class="form-group">
+        <label for="appointmentType">Appointment Type</label>
+        <input id="appointmentType" type="text" maxlength="100">
+      </div>
+
+      <div class="form-group">
+        <label for="appointmentNotes">Notes</label>
+        <textarea id="appointmentNotes" rows="5"></textarea>
+      </div>
+
+      <button class="submit-button" type="submit">Create Appointment</button>
+    </form>
+  </main>
+
+  <script>
+    const APPOINTMENTS_URL = "http://127.0.0.1:8000/appointments";
+
+    document.getElementById("closeButton").addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+
+    document.getElementById("appointmentForm").addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const appointmentData = {
+        patient_num: Number(document.getElementById("patientNum").value),
+        appointment_date: document.getElementById("appointmentDate").value,
+        start_time: document.getElementById("startTime").value,
+        appointment_type: document.getElementById("appointmentType").value || null,
+        notes: document.getElementById("appointmentNotes").value || null
+      };
+
+      try {
+        const response = await fetch(APPOINTMENTS_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(appointmentData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error(
+              `Patient #${appointmentData.patient_num} does not exist.`
+            );
+          }
+
+          throw new Error(result.detail || "Could not create appointment.");
+        }
+
+        alert("Appointment created successfully.");
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Error creating appointment:", error);
+        alert(error.message || "Could not connect to the backend.");
+      }
+    });
+  </script>
+</body>
+</html>

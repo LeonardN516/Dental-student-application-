@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, time
 from typing import Optional
 
 from pydantic import BaseModel
@@ -24,6 +24,9 @@ class PatientCreate(BaseModel):
 
     notes: Optional[str] = None
 
-    date_last_cleaning: Optional[date] = None
-
-    date_next_cleaning: Optional[date] = None
+class AppointmentCreate(BaseModel):
+    patient_num: int
+    appointment_date: date
+    start_time: time
+    appointment_type: Optional[str] = None
+    notes: Optional[str] = None

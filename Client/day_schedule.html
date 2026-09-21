@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Schedule</title>
+  <link rel="stylesheet" href="day_schedule.css">
+</head>
+<body>
+  <main class="schedule-container">
+    <button id="backButton" class="back-button" type="button">
+      &larr; Back to calendar
+    </button>
+
+    <section class="schedule-card">
+      <header class="schedule-header">
+        <p>Daily schedule</p>
+        <h1 id="dateHeading">Selected day</h1>
+      </header>
+
+      <div class="empty-schedule">
+        <h2>No appointments for this day</h2>
+        <p>Appointments scheduled for this date will appear here.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById("backButton").addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+
+    const selectedDate = new URLSearchParams(window.location.search).get("date");
+
+    if (selectedDate) {
+      const dateParts = selectedDate.split("-").map(Number);
+      const localDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
+      document.getElementById("dateHeading").textContent =
+        new Intl.DateTimeFormat("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric"
+        }).format(localDate);
+    }
+  </script>
+</body>
+</html>
