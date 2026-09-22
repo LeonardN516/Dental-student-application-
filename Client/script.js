@@ -134,6 +134,12 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
+const requestedTab = new URLSearchParams(window.location.search).get("tab");
+
+if (requestedTab === "patients") {
+  document.querySelector('.tab[data-tab="patients"]').click();
+}
+
 renderCalendar();
 
 function getAppointmentDateTime(appointment) {

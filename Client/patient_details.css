@@ -240,24 +240,8 @@ h1 {
   }
 
 }
-  .update-button {
-
-    width: 100%;
-
-    padding: 12px;
-
-    font-size: 30px;
-
-    border: none;
-
-    border-radius: 5px;
-
-    cursor: pointer;
-
-    background-color: #4CAF50;
-
-    color: white;
-
+.update-button {
+  background-color: #4CAF50;
 }
 
 

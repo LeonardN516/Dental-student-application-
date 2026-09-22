@@ -85,7 +85,7 @@
     const selectedPatientNumber = new URLSearchParams(window.location.search).get("patient_num");
 
     document.getElementById("backButton").addEventListener("click", () => {
-      window.location.href = "index.html";
+      window.location.href = "index.html?tab=patients";
     });
 
     function setInputValue(elementId, value) {
