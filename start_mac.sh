@@ -33,20 +33,15 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
-for attempt in {1..30}; do
-  if curl -fsS http://127.0.0.1:8000/ >/dev/null 2>&1 && \
-     curl -fsS http://127.0.0.1:5500/index.html >/dev/null 2>&1; then
-    open http://127.0.0.1:5500/index.html
-    break
-  fi
+sleep 5
 
-  if [ "$attempt" -eq 30 ]; then
-    echo "The application did not start successfully."
-    exit 1
-  fi
+if ! curl -fsS http://127.0.0.1:8000/ >/dev/null 2>&1 || \
+   ! curl -fsS http://127.0.0.1:5500/index.html >/dev/null 2>&1; then
+  echo "The application did not start successfully."
+  exit 1
+fi
 
-  sleep 1
-done
+open http://127.0.0.1:5500/index.html
 
 echo "Dentistry Scheduler is running. Press Control+C to stop it."
 wait

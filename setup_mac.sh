@@ -18,18 +18,12 @@ brew services start postgresql@17
 POSTGRES_BIN="$(brew --prefix postgresql@17)/bin"
 DATABASE_NAME="Dentistry_scheduler"
 
-for attempt in {1..30}; do
-  if "$POSTGRES_BIN/pg_isready" -q; then
-    break
-  fi
+sleep 2
 
-  if [ "$attempt" -eq 30 ]; then
-    echo "PostgreSQL did not become ready."
-    exit 1
-  fi
-
-  sleep 1
-done
+if ! "$POSTGRES_BIN/pg_isready" -q; then
+  echo "PostgreSQL did not become ready."
+  exit 1
+fi
 
 if ! "$POSTGRES_BIN/psql" -d postgres -tAc \
   "SELECT 1 FROM pg_database WHERE datname = '$DATABASE_NAME'" | grep -q 1; then
