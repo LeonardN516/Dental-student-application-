@@ -1,4 +1,6 @@
-.venv 
+.venv/
 classes_Needed.log
 __pycache__/
+*.py[cod]
 .env
+.DS_Store

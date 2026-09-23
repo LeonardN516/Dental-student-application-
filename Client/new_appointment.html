@@ -16,9 +16,11 @@
 
     <form id="appointmentForm">
       <div class="form-group">
-        <label for="patientNum">Patient Number</label>
-        <input id="patientNum" type="number" min="1" required>
-        <small>The patient number must belong to an existing patient.</small>
+        <label for="patientNum">Patient</label>
+        <select id="patientNum" required disabled>
+          <option value="">Loading patients...</option>
+        </select>
+        <small>Select an existing patient by initials and patient number.</small>
       </div>
 
       <div class="form-group">
@@ -41,16 +43,70 @@
         <textarea id="appointmentNotes" rows="5"></textarea>
       </div>
 
-      <button class="submit-button" type="submit">Create Appointment</button>
+      <button id="submitButton" class="submit-button" type="submit" disabled>
+        Create Appointment
+      </button>
     </form>
   </main>
 
   <script>
-    const  APPOINTMENTS_URL= "http://127.0.0.1:8000/appointments";
+    const APPOINTMENTS_URL = "http://127.0.0.1:8000/appointments";
+    const PATIENTS_URL = "http://127.0.0.1:8000/patients";
 
     document.getElementById("closeButton").addEventListener("click", () => {
       window.location.href = "index.html";
     });
+
+    async function loadPatients() {
+      const patientSelect = document.getElementById("patientNum");
+      const submitButton = document.getElementById("submitButton");
+
+      try {
+        const response = await fetch(PATIENTS_URL);
+
+        if (!response.ok) {
+          throw new Error("Could not load patients.");
+        }
+
+        const patients = await response.json();
+        patientSelect.innerHTML = "";
+
+        if (patients.length === 0) {
+          const emptyOption = document.createElement("option");
+          emptyOption.value = "";
+          emptyOption.textContent = "No patients available";
+          patientSelect.appendChild(emptyOption);
+          return;
+        }
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select a patient";
+        patientSelect.appendChild(placeholder);
+
+        patients
+          .sort((first, second) => first.patient_num - second.patient_num)
+          .forEach(patient => {
+            const option = document.createElement("option");
+            option.value = patient.patient_num;
+            option.textContent = `${patient.initials} — Patient #${patient.patient_num}`;
+            patientSelect.appendChild(option);
+          });
+
+        patientSelect.disabled = false;
+        submitButton.disabled = false;
+      } catch (error) {
+        console.error("Error loading patients:", error);
+        patientSelect.innerHTML = "";
+
+        const errorOption = document.createElement("option");
+        errorOption.value = "";
+        errorOption.textContent = "Could not load patients";
+        patientSelect.appendChild(errorOption);
+
+        alert("Could not load patients. Check that the backend is running.");
+      }
+    }
 
     document.getElementById("appointmentForm").addEventListener("submit", async event => {
       event.preventDefault();
@@ -91,6 +147,8 @@
         alert(error.message || "Could not connect to the backend.");
       }
     });
+
+    loadPatients();
   </script>
 </body>
 </html>

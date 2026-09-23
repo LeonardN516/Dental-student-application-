@@ -286,6 +286,8 @@ body {
     text-align: left;
 }
 .patient-row {
+    appearance: none;
+    -webkit-appearance: none;
     display: grid;
     grid-template-columns: 2fr 1.5fr 1fr;
     gap: 20px;

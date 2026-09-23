@@ -21,6 +21,20 @@ fi
 
 brew services start postgresql@17 >/dev/null
 
+for port in 8000 5500; do
+  EXISTING_PID="$(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)"
+
+  if [ -n "$EXISTING_PID" ]; then
+    echo "Port $port is already being used by process $EXISTING_PID."
+    echo "Stop the old application with:"
+    echo "kill $EXISTING_PID"
+    echo "Then run bash start_mac.sh again."
+    exit 1
+  fi
+done
+
+echo "Starting Dentistry Scheduler from: $PROJECT_DIR"
+
 uv run fastapi dev Server/main.py &
 BACKEND_PID=$!
 
@@ -35,7 +49,9 @@ trap cleanup EXIT INT TERM
 
 sleep 5
 
-if ! curl -fsS http://127.0.0.1:8000/ >/dev/null 2>&1 || \
+if ! kill -0 "$BACKEND_PID" 2>/dev/null || \
+   ! kill -0 "$FRONTEND_PID" 2>/dev/null || \
+   ! curl -fsS http://127.0.0.1:8000/ >/dev/null 2>&1 || \
    ! curl -fsS http://127.0.0.1:5500/index.html >/dev/null 2>&1; then
   echo "The application did not start successfully."
   exit 1
