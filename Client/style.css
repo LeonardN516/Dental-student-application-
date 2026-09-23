@@ -308,6 +308,17 @@ body {
   background: #e5e5e5;
 }
 
+.patient-row > span {
+  align-self: center;
+}
+
+.patient-row > span:nth-child(2),
+.patient-row > span:nth-child(3),
+.patient-row-title > span:nth-child(2),
+.patient-row-title > span:nth-child(3) {
+  text-align: center;
+}
+
 .header-row {
   background: var(--light-pink);
   color: #566674;
@@ -329,17 +340,19 @@ body {
 }
 
 .empty-icon {
+  appearance: none;
+  -webkit-appearance: none;
   width: 46px;
   height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   margin-bottom: 13px;
   border: 1px dashed #aebac3;
   border-radius: 50%;
   background: white;
   color: #8b99a4;
   font-size: 25px;
+  line-height: 1;
   cursor: pointer;
   padding: 0;
 
