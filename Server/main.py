@@ -135,7 +135,7 @@ def get_appointments(
     appointment_date: Optional[date] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None
-):
+):#accepts 4 optional inputs when calling this function
     if start_date and end_date and start_date > end_date:
         raise HTTPException(
             status_code=400,
@@ -144,7 +144,11 @@ def get_appointments(
 
     db = SessionLocal()
     try:
-        query = db.query(Appointment)
+        query = (
+            #Match an appointment with the patient whose patient_num equals the appointment’s patient_num
+            db.query(Appointment, Patient.initials)
+            .join(Patient, Appointment.patient_num == Patient.patient_num)
+)
 
         if patient_num is not None:
             query = query.filter(
@@ -163,10 +167,24 @@ def get_appointments(
                 Appointment.appointment_date <= end_date
             )
 
-        return query.order_by(
+        results = query.order_by(
             Appointment.appointment_date,
             Appointment.start_time
         ).all()
+        #since we joined two objects you can't do return all() becuase it does not return only all of 
+        #the appointments table. we now add patient.initials so we make a new "dictionary" of return values seen below
+        return [
+        {
+            "appointment_id": appointment.appointment_id,
+            "patient_num": appointment.patient_num,
+            "initials": initials,
+            "appointment_date": appointment.appointment_date,
+            "start_time": appointment.start_time,
+            "appointment_type": appointment.appointment_type,
+            "notes": appointment.notes
+        }
+    for appointment, initials in results
+]
     finally:
         db.close()
 

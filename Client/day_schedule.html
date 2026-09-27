@@ -93,11 +93,15 @@
           const type = document.createElement("h2");
           type.textContent = appointment.appointment_type || "Appointment";
 
+          const initials = document.createElement("p");
+          initials.textContent = `Initials: ${appointment.initials}`;
+
           const patient = document.createElement("p");
           patient.textContent = `Patient #${appointment.patient_num}`;
-
+          
           information.appendChild(type);
           information.appendChild(patient);
+          information.appendChild(initials);
 
           if (appointment.notes) {
             const notes = document.createElement("p");
