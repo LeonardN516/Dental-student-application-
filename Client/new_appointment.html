@@ -54,8 +54,16 @@
     const PATIENTS_URL = "http://127.0.0.1:8000/patients";
 
     document.getElementById("closeButton").addEventListener("click", () => {
-      window.location.href = "index.html";
+      const returnTo = new URLSearchParams(window.location.search).get("return_to");
+      const isLocalPath = returnTo?.startsWith("/") && !returnTo.startsWith("//");
+      window.location.href = isLocalPath ? returnTo : "index.html";
     });
+
+    const selectedDate = new URLSearchParams(window.location.search).get("date");
+
+    if (selectedDate) {
+      document.getElementById("appointmentDate").value = selectedDate;
+    }
 
     async function loadPatients() {
       const patientSelect = document.getElementById("patientNum");
@@ -110,7 +118,6 @@
 
     document.getElementById("appointmentForm").addEventListener("submit", async event => {
       event.preventDefault();
-
       const appointmentData = {
         patient_num: Number(document.getElementById("patientNum").value),
         appointment_date: document.getElementById("appointmentDate").value,

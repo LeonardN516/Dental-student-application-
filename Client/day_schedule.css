@@ -27,8 +27,15 @@ body {
   margin: 0 auto;
 }
 
-.back-button {
+.schedule-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 20px;
+}
+
+.back-button {
   padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: 7px;
@@ -37,6 +44,21 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.schedule-appointment-button {
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--blue);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.schedule-appointment-button:hover {
+  background: var(--navy);
 }
 
 .schedule-card {
