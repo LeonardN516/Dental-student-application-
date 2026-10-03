@@ -62,11 +62,14 @@
     const APPOINTMENTS_URL = "http://127.0.0.1:8000/appointments";
     const urlParameters = new URLSearchParams(window.location.search);
     const appointmentId = urlParameters.get("appointment_id");
-
-    function getReturnUrl() {
+    function getDate(){
       if (urlParameters.get("from") === "day" && urlParameters.get("date")) {
         return `day_schedule.html?date=${encodeURIComponent(urlParameters.get("date"))}`;
       }
+      return false; 
+    }
+    function getReturnUrl() {
+      
 
       if (urlParameters.get("from") === "patient" && urlParameters.get("patient_num")) {
         return `patient_details.html?patient_num=${encodeURIComponent(urlParameters.get("patient_num"))}`;
@@ -113,7 +116,7 @@
         document.getElementById("appointmentNumber").textContent =
           `Appointment #${appointment.appointment_id}`;
         setInputValue("patientNum", appointment.patient_num);
-        setInputValue("appointmentDate", appointment.appointment_date);
+        setInputValue("appointmentDate", appointment.appointment_date); 
         setInputValue("startTime", appointment.start_time.slice(0, 5));
         setInputValue("appointmentType", appointment.appointment_type);
         setInputValue("appointmentNotes", appointment.notes);

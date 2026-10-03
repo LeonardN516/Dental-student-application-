@@ -8,9 +8,14 @@
 </head>
 <body>
   <main class="schedule-container">
-    <button id="backButton" class="back-button" type="button">
-      &larr; Back to calendar
-    </button>
+    <div class="schedule-actions">
+      <button id="backButton" class="back-button" type="button">
+        &larr; Back to calendar
+      </button>
+      <button id="scheduleAppointmentButton" class="schedule-appointment-button" type="button">
+        Schedule Appointment
+      </button>
+    </div>
 
     <section class="schedule-card">
       <header class="schedule-header">
@@ -31,6 +36,17 @@
 
     const APPOINTMENTS_URL = "http://127.0.0.1:8000/appointments";
     const selectedDate = new URLSearchParams(window.location.search).get("date");
+
+    document.getElementById("scheduleAppointmentButton").addEventListener("click", () => {
+      const returnTo = window.location.pathname + window.location.search;
+      const parameters = new URLSearchParams({ return_to: returnTo });
+
+      if (selectedDate) {
+        parameters.set("date", selectedDate);
+      }
+
+      window.location.href = `new_appointment.html?${parameters.toString()}`;
+    });
 
     function formatTime(timeValue) {
       const [hour, minute] = timeValue.split(":").map(Number);

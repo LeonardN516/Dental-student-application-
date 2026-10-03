@@ -28,7 +28,7 @@
       <button
         class="schedule-appointment-button"
         type="button"
-        onclick="window.location.href='new_appointment.html'"
+        onclick="window.location.href='new_appointment.html?return_to=' + encodeURIComponent(window.location.pathname + window.location.search)"
       >
         Schedule Appointment
       </button>
