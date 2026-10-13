@@ -1,7 +1,11 @@
 from datetime import date
 from typing import Optional
+from contextlib import asynccontextmanager
+import asyncio
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
+from starlette.concurrency import run_in_threadpool
+import reminders
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -10,7 +14,16 @@ from models import Patient, Appointment
 from schemas import PatientCreate, AppointmentCreate
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app):
+    task = asyncio.create_task(run_in_threadpool(reminders.refresh_reminders))
+    try:
+        yield
+    finally:
+        await task
+
+
+app = FastAPI(lifespan=lifespan)
 #Allow requests from any website/frontend. shoudl change allow_origins = ["https://yourwebsite.com"]
 app.add_middleware(
     CORSMiddleware,
@@ -24,6 +37,17 @@ app.add_middleware(
 @app.get("/")
 def home():
     return {"message": "FastAPI is working"}
+
+
+@app.get("/reminders/status")
+def reminder_status():
+    return reminders.status
+
+
+@app.post("/reminders/refresh")
+def refresh_email_reminders():
+    reminders.refresh_reminders()
+    return reminders.status
 
 
 @app.get("/test-database")
@@ -93,7 +117,7 @@ def create_patient(patient: PatientCreate):
         db.close()
 
 @app.put("/patients/{patient_num}")
-def update_patient(patient_num: int, patient_data: PatientCreate):
+def update_patient(patient_num: int, patient_data: PatientCreate, background_tasks: BackgroundTasks):
     db = SessionLocal()
     try:
         patient = db.get(Patient, patient_num)
@@ -105,6 +129,7 @@ def update_patient(patient_num: int, patient_data: PatientCreate):
 
         db.commit()
         db.refresh(patient)
+        background_tasks.add_task(reminders.refresh_reminders)
         return {
             "message": "Patient updated successfully",
             "patient_num": patient.patient_num
@@ -113,7 +138,7 @@ def update_patient(patient_num: int, patient_data: PatientCreate):
         db.close()
 
 @app.delete("/patients/{patient_num}")
-def delete_patient(patient_num: int):
+def delete_patient(patient_num: int, background_tasks: BackgroundTasks):
     db = SessionLocal()
     try:
         patient = db.get(Patient, patient_num)
@@ -122,6 +147,7 @@ def delete_patient(patient_num: int):
 
         db.delete(patient)
         db.commit()
+        background_tasks.add_task(reminders.refresh_reminders)
         return {"message": "Patient deleted successfully"}
     finally:
         db.close()
@@ -204,7 +230,7 @@ def get_appointment(appointment_id: int):
 
 
 @app.post("/appointments", status_code=201)
-def create_appointment(appointment_data: AppointmentCreate):
+def create_appointment(appointment_data: AppointmentCreate, background_tasks: BackgroundTasks):
     db = SessionLocal()
     try:
         patient = db.get(Patient, appointment_data.patient_num)
@@ -216,6 +242,7 @@ def create_appointment(appointment_data: AppointmentCreate):
         db.add(new_appointment)
         db.commit()
         db.refresh(new_appointment)
+        background_tasks.add_task(reminders.refresh_reminders)
 
         return {
             "message": "Appointment created successfully",
@@ -228,7 +255,8 @@ def create_appointment(appointment_data: AppointmentCreate):
 @app.put("/appointments/{appointment_id}")
 def update_appointment(
     appointment_id: int,
-    appointment_data: AppointmentCreate
+    appointment_data: AppointmentCreate,
+    background_tasks: BackgroundTasks
 ):
     db = SessionLocal()
     try:
@@ -247,6 +275,7 @@ def update_appointment(
 
         db.commit()
         db.refresh(appointment)
+        background_tasks.add_task(reminders.refresh_reminders)
 
         return {
             "message": "Appointment updated successfully",
@@ -257,7 +286,7 @@ def update_appointment(
 
 
 @app.delete("/appointments/{appointment_id}")
-def delete_appointment(appointment_id: int):
+def delete_appointment(appointment_id: int, background_tasks: BackgroundTasks):
     db = SessionLocal()
     try:
         appointment = db.get(Appointment, appointment_id)
@@ -267,6 +296,7 @@ def delete_appointment(appointment_id: int):
 
         db.delete(appointment)
         db.commit()
+        background_tasks.add_task(reminders.refresh_reminders)
 
         return {"message": "Appointment deleted successfully"}
     finally:
