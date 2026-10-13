@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Date, Time, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Date, Time, ForeignKey, DateTime
 from database import Base
 
 
@@ -62,3 +62,13 @@ class Appointment(Base):
       start_time = Column(Time, nullable=False)
       appointment_type = Column(String(100))
       notes = Column(Text)
+
+
+class EmailReminder(Base):
+    __tablename__ = "email_reminder"
+
+    reminder_date = Column(Date, primary_key=True)
+    provider_id = Column(String(255))
+    pending_key = Column(String(255))
+    pending_payload = Column(Text)
+    pending_since = Column(DateTime(timezone=True))

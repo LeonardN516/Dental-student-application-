@@ -274,6 +274,7 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "sqlalchemy" },
     { name = "twilio" },
+    { name = "tzdata" },
 ]
 
 [package.metadata]
@@ -284,6 +285,7 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.2.3" },
     { name = "sqlalchemy", specifier = ">=2.0.52" },
     { name = "twilio", specifier = ">=9.11.1" },
+    { name = "tzdata", specifier = ">=2025.2" },
 ]
 
 [[package]]

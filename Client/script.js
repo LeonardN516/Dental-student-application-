@@ -289,3 +289,30 @@ document.getElementById("patientSearch").addEventListener("input", event => {
 
 // Load patients when the page opens
 loadPatients();
+
+async function loadReminderStatus(retry = false) {
+    const label = document.getElementById("reminderStatus");
+    const button = document.getElementById("retryReminders");
+    button.disabled = true;
+    if (retry) label.textContent = "Refreshing appointment emails...";
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/reminders/${retry ? "refresh" : "status"}`, {
+            method: retry ? "POST" : "GET"
+        });
+        if (!response.ok) throw new Error("Could not check reminders");
+        const status = await response.json();
+        label.textContent = status.message;
+        button.hidden = status.state !== "error";
+        if (status.state === "refreshing") {
+            setTimeout(() => loadReminderStatus(), 2000);
+        }
+    } catch (error) {
+        label.textContent = "Could not check email reminders. Make sure the backend is running.";
+        button.hidden = false;
+    } finally {
+        button.disabled = false;
+    }
+}
+
+document.getElementById("retryReminders").addEventListener("click", () => loadReminderStatus(true));
+loadReminderStatus();
